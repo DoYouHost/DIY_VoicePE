@@ -1,4 +1,6 @@
-# ESPHome Project Template
+# DIY VoicePE
+
+## Overview
 
 This repo serves as a template for creating a new ESPHome project.
 
