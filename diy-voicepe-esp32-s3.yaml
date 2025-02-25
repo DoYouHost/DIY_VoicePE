@@ -1025,11 +1025,11 @@ script:
       - if:
           condition:
             light.is_on: led_ring
-        then:
-          - light.turn_on:
-              brightness: !lambda return min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f );
-              id: voice_assistant_leds
-              effect: "Music Playing"
+          then:
+            - light.turn_on:
+                brightness: !lambda return min ( max( id(led_ring).current_values.get_brightness() , 0.2f ) + 0.1f , 1.0f );
+                id: voice_assistant_leds
+                effect: "Music Playing"
 
 i2s_audio:
   - id: i2s_output
