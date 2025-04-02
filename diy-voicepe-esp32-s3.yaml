@@ -72,7 +72,6 @@ packages:
 
 wifi:
   id: wifi_id
-  use_address: 192.168.1.122
   output_power: 8.5dBm
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
@@ -138,16 +137,6 @@ globals:
     initial_value: ${voice_assist_not_ready_phase_id}
   # Global variable tracking if the LED color was recently changed.
   - id: color_changed
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  # Global variable tracking if the jack has been plugged touched.
-  - id: jack_plugged_recently
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  # Global variable tracking if the jack has been unplugged touched.
-  - id: jack_unplugged_recently
     type: bool
     restore_value: no
     initial_value: 'false'
@@ -235,8 +224,8 @@ binary_sensor:
                                                   id: play_sound
                                                   priority: true
                                                   sound_file: !lambda return id(left_button_press_sound);
-                                              - delay: 300ms
-                                              - voice_assistant.start:
+                                              # - delay: 300ms
+                                              # - voice_assistant.start:
       - timing:
           - ON for at least 10s
         then:
@@ -303,6 +292,11 @@ binary_sensor:
                       switch.is_on: timer_ringing
                     then:
                       - switch.turn_off: timer_ringing
+                    else:
+                      - script.execute:
+                          id: play_sound
+                          priority: true
+                          sound_file: !lambda return id(right_button_press_sound);
 
 switch:
   # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
@@ -1145,21 +1139,23 @@ media_player:
 
     files:
       - id: mute_switch_on_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/mute_switch_on.flac
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/mute_switch_on.flac
       - id: mute_switch_off_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/mute_switch_off.flac
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/mute_switch_off.flac
       - id: timer_finished_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/timer_finished.flac
       - id: wake_word_triggered_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/wake_word_triggered.flac
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/wake_word_triggered.flac
       - id: left_button_press_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/center_button_press.flac
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/center_button_press.flac
+      - id: right_button_press_sound
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/center_button_press.flac
       - id: factory_reset_initiated_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_initiated.mp3
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/factory_reset_initiated.mp3
       - id: factory_reset_cancelled_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_cancelled.mp3
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/factory_reset_cancelled.mp3
       - id: factory_reset_confirmed_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_confirmed.mp3
+        file: https://github.com/MorganMLGman/DIY_VoicePE/raw/main/sounds/factory_reset_confirmed.mp3
 
 micro_wake_word:
   id: mww
