@@ -22,7 +22,7 @@ esphome:
   name: diy-voicepe
   friendly_name: DIY VoicePE
   name_add_mac_suffix: true
-  min_version: 2025.2.0
+  min_version: 2025.3.3
 
   on_boot:
     priority: 375
@@ -72,6 +72,7 @@ packages:
 
 wifi:
   id: wifi_id
+  # use_address: "192.168.1.122"
   output_power: 8.5dBm
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
@@ -86,8 +87,6 @@ captive_portal:
 
 logger:
   level: DEBUG
-  logs:
-    sensor: WARN
 
 api:
   id: api_id
@@ -224,8 +223,12 @@ binary_sensor:
                                                   id: play_sound
                                                   priority: true
                                                   sound_file: !lambda return id(left_button_press_sound);
-                                              # - delay: 300ms
-                                              # - voice_assistant.start:
+                                              - delay: 300ms
+                                              - micro_wake_word.stop:
+                                              - delay: 20ms
+                                              - voice_assistant.start:
+                                                  wake_word: "Okay Nabu"
+
       - timing:
           - ON for at least 10s
         then:
