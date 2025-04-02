@@ -161,6 +161,8 @@ binary_sensor:
       number: GPIO6
       mode: INPUT_PULLUP
       inverted: true
+    filters:
+      - delayed_on_off: 50ms
     on_press:
       - script.execute: control_leds
     on_release:
@@ -277,6 +279,8 @@ binary_sensor:
       number: GPIO5
       mode: INPUT_PULLUP
       inverted: true
+    filters:
+      - delayed_on_off: 50ms
     on_press:
       - script.execute: control_leds
     on_release:
