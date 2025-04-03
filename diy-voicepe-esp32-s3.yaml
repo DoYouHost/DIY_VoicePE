@@ -74,8 +74,6 @@ wifi:
   id: wifi_id
   use_address: "192.168.1.117"
   output_power: 8.5dBm
-  enable_btm: true
-  enable_rrm: true
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
     - script.execute: control_leds
@@ -89,6 +87,8 @@ captive_portal:
 
 logger:
   level: DEBUG
+  logs:
+    sensor: WARN
 
 api:
   id: api_id
@@ -215,7 +215,6 @@ binary_sensor:
                                         media_player.is_playing:
                                       then:
                                         - media_player.pause:
-
       - timing:
           - ON for at least 10s
         then:
