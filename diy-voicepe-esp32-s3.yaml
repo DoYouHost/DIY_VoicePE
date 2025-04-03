@@ -72,7 +72,7 @@ packages:
 
 wifi:
   id: wifi_id
-  # use_address: "192.168.1.122"
+  use_address: "192.168.1.117"
   output_power: 8.5dBm
   enable_btm: true
   enable_rrm: true
@@ -215,23 +215,6 @@ binary_sensor:
                                         media_player.is_playing:
                                       then:
                                         - media_player.pause:
-                                      else:
-                                        - if:
-                                            condition:
-                                              and:
-                                                - switch.is_off: master_mute_switch
-                                                - not:
-                                                    voice_assistant.is_running
-                                            then:
-                                              - script.execute:
-                                                  id: play_sound
-                                                  priority: true
-                                                  sound_file: !lambda return id(left_button_press_sound);
-                                              - delay: 300ms
-                                              - micro_wake_word.stop:
-                                              - delay: 20ms
-                                              - voice_assistant.start:
-                                                  wake_word: "Okay Nabu"
 
       - timing:
           - ON for at least 10s
@@ -301,11 +284,6 @@ binary_sensor:
                       switch.is_on: timer_ringing
                     then:
                       - switch.turn_off: timer_ringing
-                    else:
-                      - script.execute:
-                          id: play_sound
-                          priority: true
-                          sound_file: !lambda return id(right_button_press_sound);
 
 switch:
   # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
