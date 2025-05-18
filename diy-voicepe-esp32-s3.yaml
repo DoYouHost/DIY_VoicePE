@@ -22,7 +22,7 @@ esphome:
   name: diy-voicepe
   friendly_name: DIY VoicePE
   name_add_mac_suffix: true
-  min_version: 2025.4.1
+  min_version: 2025.2.2
 
   on_boot:
     priority: 375
