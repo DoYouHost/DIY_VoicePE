@@ -114,7 +114,7 @@ update:
   - platform: http_request
     id: update_http_request
     name: Firmware Update
-    source: https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest.json
+    source: https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json
 
 psram:
   mode: octal
@@ -396,11 +396,11 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - logger.log: "OTA updates set to use Beta firmware"
-      - lambda: id(update_http_request).set_source_url("https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest-beta.json");
+      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest-beta.json");
       - component.update: update_http_request
     on_turn_off:
       - logger.log: "OTA updates set to use Production firmware"
-      - lambda: id(update_http_request).set_source_url("https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest.json");
+      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json");
       - component.update: update_http_request
 
   - platform: template
