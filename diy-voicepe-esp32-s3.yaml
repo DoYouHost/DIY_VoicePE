@@ -22,7 +22,7 @@ esphome:
   name: diy-voicepe
   friendly_name: DIY VoicePE
   name_add_mac_suffix: true
-  min_version: 2025.2.2
+  min_version: 2025.5.0
 
   on_boot:
     priority: 375
@@ -45,16 +45,18 @@ esphome:
 
 esp32:
   board: esp32-s3-devkitc-1
+  cpu_frequency: 240MHz
   variant: esp32s3
   flash_size: 16MB
   framework:
     type: esp-idf
     version: recommended
     sdkconfig_options:
-      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
       CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
       CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
       CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y"
+      CONFIG_SPIRAM_RODATA: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
       CONFIG_BT_ALLOCATION_FROM_SPIRAM_FIRST: "y"
       CONFIG_BT_BLE_DYNAMIC_ENV_MEMORY: "y"
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
@@ -72,7 +74,6 @@ packages:
 
 wifi:
   id: wifi_id
-  use_address: "192.168.1.117"
   output_power: 8.5dBm
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
@@ -82,6 +83,9 @@ wifi:
   ap:
     ssid: "DIY VoicePE"
     password: ${ap_password}
+
+network:
+  enable_ipv6: true
 
 captive_portal:
 
@@ -108,8 +112,9 @@ ota:
 
 update:
   - platform: http_request
+    id: update_http_request
     name: Firmware Update
-    source: https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest.json
+    source: https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json
 
 psram:
   mode: octal
@@ -381,6 +386,23 @@ binary_sensor:
                     event_type: "long_press"
 
 switch:
+  - platform: template
+    id: beta_firmware
+    name: Beta firmware
+    icon: "mdi:test-tube"
+    disabled_by_default: true
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - logger.log: "OTA updates set to use Beta firmware"
+      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest-beta.json");
+      - component.update: update_http_request
+    on_turn_off:
+      - logger.log: "OTA updates set to use Production firmware"
+      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json");
+      - component.update: update_http_request
+
   # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
   - platform: template
     id: master_mute_switch

@@ -7,7 +7,8 @@ esphome:
     version: dev
 
 dashboard_import:
-  package_import_url: github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
+  package_import_url: 
+    github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
 
 esp32_improv:
   authorizer: left_button
@@ -16,3 +17,4 @@ improv_serial:
 
 esp32_ble:
   name: diy-voicepe
+  
