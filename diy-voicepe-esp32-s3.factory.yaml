@@ -1,3 +1,4 @@
+---
 packages:
   core: !include diy-voicepe-esp32-s3.yaml
 
@@ -7,7 +8,7 @@ esphome:
     version: dev
 
 dashboard_import:
-  package_import_url: 
+  package_import_url:
     github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
 
 esp32_improv:
@@ -17,4 +18,3 @@ improv_serial:
 
 esp32_ble:
   name: diy-voicepe
-  

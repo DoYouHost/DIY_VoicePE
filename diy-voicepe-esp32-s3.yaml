@@ -114,7 +114,7 @@ update:
   - platform: http_request
     id: update_http_request
     name: Firmware Update
-    source: https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json
+    source: https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest.json
 
 psram:
   mode: octal
@@ -396,28 +396,29 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - logger.log: "OTA updates set to use Beta firmware"
-      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest-beta.json");
+      - lambda: id(update_http_request).set_source_url("https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest-beta.json");
       - component.update: update_http_request
     on_turn_off:
       - logger.log: "OTA updates set to use Production firmware"
-      - lambda: id(update_http_request).set_source_url("https://morganmlg.com/esphome-diy-vpe/DIY_VoicePE/manifest.json");
+      - lambda: id(update_http_request).set_source_url("https://morganmlgman.github.io/DIY_VoicePE/firmware/DIY_VoicePE.manifest.json");
       - component.update: update_http_request
 
-  # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
   - platform: template
     id: master_mute_switch
     restore_mode: RESTORE_DEFAULT_OFF
     icon: "mdi:microphone-off"
     name: Mute
     entity_category: config
+    lambda: |-
+      if (id(asr_mic).get_mute_state()) {
+        return true;
+      } else {
+        return false;
+      }
     turn_on_action:
-      - switch.template.publish:
-          id: master_mute_switch
-          state: ON
+      - microphone.mute:
     turn_off_action:
-      - switch.template.publish:
-          id: master_mute_switch
-          state: OFF
+      - microphone.unmute:
     on_turn_on:
       - script.execute: control_leds
     on_turn_off:
@@ -438,7 +439,7 @@ switch:
     restore_mode: ALWAYS_OFF
     on_turn_off:
       # # Disable stop wake word
-      # - lambda: id(stop).disable();
+      - micro_wake_word.disable_model: stop
       - script.execute: disable_repeat
       # Stop any current annoucement (ie: stop the timer ring mid playback)
       - if:
@@ -461,7 +462,7 @@ switch:
           decibel_reduction: 20
           duration: 0.0s
       # # Enable stop wake word
-      # - lambda: id(stop).enable();
+      - micro_wake_word.enable_model: stop
       # Ring timer
       - script.execute: ring_timer
       # Refresh LED
@@ -1142,6 +1143,24 @@ script:
             }
           }
           id(is_timer_active) = output;
+
+  - id: activate_stop_word_once
+    then:
+      - delay: 1s
+      # Enable stop wake word
+      - if:
+          condition:
+            switch.is_off: timer_ringing
+          then:
+            - micro_wake_word.enable_model: stop
+            - wait_until:
+                not:
+                  media_player.is_announcing:
+            - if:
+                condition:
+                  switch.is_off: timer_ringing
+                then:
+                  - micro_wake_word.disable_model: stop
   
   - id: control_leds_music_playing
     then:
@@ -1175,6 +1194,8 @@ microphone:
     i2s_din_pin: GPIO15
     channel: left
     i2s_audio_id: i2s_input
+    sample_rate: 16000
+    bits_per_sample: 32bit
 
 speaker:
   - platform: i2s_audio
@@ -1288,9 +1309,20 @@ micro_wake_word:
   id: mww
   models:
     - model: https://github.com/kahrendt/microWakeWord/releases/download/okay_nabu_20241226.3/okay_nabu.json
+      id: okay_nabu
+    - model: hey_jarvis
+      id: hey_jarvis
+    - model: hey_mycroft
+      id: hey_mycroft
+    - model: https://github.com/kahrendt/microWakeWord/releases/download/stop/stop.json
+      id: stop
+      internal: true
   vad:
     model: https://github.com/kahrendt/microWakeWord/releases/download/v2.1_models/vad.json
-  microphone: asr_mic
+  microphone: 
+    microphone: asr_mic
+    gain_factor: 4
+  stop_after_detection: false
   on_wake_word_detected:
     # If the wake word is detected when the device is muted (Possible with the software mute switch): Do nothing
     - if:
@@ -1324,9 +1356,37 @@ micro_wake_word:
                       - voice_assistant.start:
                           wake_word: !lambda return wake_word;
 
+select:
+  - platform: template
+    name: "Wake word sensitivity"
+    optimistic: true
+    initial_option: Moderately sensitive
+    restore_value: true
+    entity_category: config
+    options:
+      - Slightly sensitive
+      - Moderately sensitive
+      - Very sensitive
+    on_value:
+      lambda: |-
+        if (x == "Slightly sensitive") {
+          id(okay_nabu).set_probability_cutoff(217);    // 0.85 -> 0.000 FAPH on DipCo (Manifest's default)
+          id(hey_jarvis).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
+          id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
+        } else if (x == "Moderately sensitive") {
+          id(okay_nabu).set_probability_cutoff(176);    // 0.69 -> 0.376 FAPH on DipCo
+          id(hey_jarvis).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
+          id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
+        } else if (x == "Very sensitive") {
+          id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo
+          id(hey_jarvis).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
+          id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
+        }
+
 voice_assistant:
   id: va
-  microphone: asr_mic
+  microphone: 
+    microphone: asr_mic
   media_player: external_media_player
   use_wake_word: false
   noise_suppression_level: 0
