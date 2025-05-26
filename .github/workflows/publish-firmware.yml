@@ -26,6 +26,8 @@ jobs:
   upload-to-r2:
     if: github.event_name == 'release'
     name: Upload to R2
+    needs:
+      - build-firmware
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
