@@ -12,7 +12,7 @@ dashboard_import:
     github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
 
 esp32_improv:
-  authorizer: left_button
+  authorizer: none
 
 improv_serial:
 
