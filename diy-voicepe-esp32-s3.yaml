@@ -9,28 +9,14 @@ substitutions:
   pin_speaker_lrc: "GPIO7"
   pin_speaker_bclk: "GPIO8"
   pin_led_di: "GPIO21"
-  #VCC 5V -> speaker and LED
-  #VCC 3.3V -> mic
-  #GND all GND +L/R in mic
 
-
-  # Phases of the Voice Assistant
-  # The voice assistant is ready to be triggered by a wake word
   voice_assist_idle_phase_id: '1'
-  # The voice assistant is waiting for a voice command (after being triggered by the wake word)
   voice_assist_waiting_for_command_phase_id: '2'
-  # The voice assistant is listening for a voice command
   voice_assist_listening_for_command_phase_id: '3'
-  # The voice assistant is currently processing the command
   voice_assist_thinking_phase_id: '4'
-  # The voice assistant is replying to the command
   voice_assist_replying_phase_id: '5'
-  # The voice assistant is not ready
   voice_assist_not_ready_phase_id: '10'
-  # The voice assistant encountered an error
   voice_assist_error_phase_id: '11'
-  # Change this to true in case you ahve a hidden SSID at home.
-  hidden_ssid: "false"
 
 esphome:
   name: home-assistant-voice
@@ -60,6 +46,7 @@ esphome:
 esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
+  cpu_frequency: 240MHz
   flash_size: 16MB
   framework:
     type: esp-idf
@@ -82,27 +69,23 @@ packages:
     files:
       - base.yaml
       - ESP32/diagnostic.yaml
-      # - ESP32/web_server.yaml
+      - ESP32/debug.yaml
     ref: master
     refresh: 0s
 
 wifi:
   id: wifi_id
+  output_power: 8.5
   use_address: "192.168.1.122"
-  output_power: 8.5dBm
-  ap:
-    ssid: "DIY VoicePE"
-    password: ${ap_password}
+  # manual_ip:
+  #   static_ip: "192.168.88.x"
+  #   gateway: "192.168.88.1"
+  #   subnet: "255.255.255.0"
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
     - script.execute: control_leds
   on_disconnect:
     - script.execute: control_leds
-
-network:
-  enable_ipv6: true
-
-captive_portal:
 
 logger:
   level: DEBUG
@@ -235,6 +218,15 @@ binary_sensor:
                                         media_player.is_playing:
                                       then:
                                         - media_player.pause:
+                                      else:
+                                        - if:
+                                            condition:
+                                              and:
+                                                - switch.is_off: master_mute_switch
+                                                - not:
+                                                    voice_assistant.is_running
+                                            then:
+                                              - voice_assistant.start:
 
       # Double Click
       #  . Exposed as an event entity. To be used in automations inside Home Assistant
@@ -834,6 +826,11 @@ script:
   - id: control_leds
     then:
       - lambda: |
+          ESP_LOGD("improv_ble_in_progress", id(improv_ble_in_progress) ? "true" : "false");
+          ESP_LOGD("init_in_progress", id(init_in_progress) ? "true" : "false");
+          ESP_LOGD("is_timer_active", id(is_timer_active) ? "true" : "false");
+          ESP_LOGD("timer_ringing", id(timer_ringing).state ? "true" : "false");
+
           id(check_if_timers_active).execute();
           if (id(is_timer_active)){
             id(fetch_first_active_timer).execute();
@@ -1295,16 +1292,10 @@ select:
       lambda: |-
         if (x == "Slightly sensitive") {
           id(okay_nabu).set_probability_cutoff(217);    // 0.85 -> 0.000 FAPH on DipCo (Manifest's default)
-          id(hey_jarvis).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
-          id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
         } else if (x == "Moderately sensitive") {
           id(okay_nabu).set_probability_cutoff(176);    // 0.69 -> 0.376 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
         } else if (x == "Very sensitive") {
-          id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
+          id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo1
         }
 
 voice_assistant:
@@ -1394,19 +1385,6 @@ voice_assistant:
     - script.execute: control_leds
   on_timer_tick:
     - script.execute: control_leds
-
-button:
-  - platform: factory_reset
-    id: factory_reset_button
-    name: "Factory Reset"
-    entity_category: diagnostic
-    internal: true
-  - platform: restart
-    id: restart_button
-    name: "Restart"
-    entity_category: config
-    disabled_by_default: true
-    icon: "mdi:restart"
 
 debug:
   update_interval: 5s

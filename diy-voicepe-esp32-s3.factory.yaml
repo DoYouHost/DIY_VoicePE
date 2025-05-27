@@ -1,5 +1,14 @@
 ---
 packages:
+  va_connected_wait_for_ble:
+    voice_assistant:
+      on_client_connected:
+        - wait_until:
+            not: ble.enabled
+        - delay: 2s
+    wifi:
+      on_disconnect:
+        - ble.enable:
   core: !include diy-voicepe-esp32-s3.yaml
 
 esphome:
@@ -11,10 +20,25 @@ dashboard_import:
   package_import_url:
     github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
 
-esp32_improv:
-  authorizer: none
+wifi:
+  on_connect:
+    - delay: 5s  # Gives time for improv results to be transmitted
+    - ble.disable:
+    - script.execute: control_leds
 
 improv_serial:
 
 esp32_ble:
   name: diy-voicepe
+
+esp32_improv:
+  authorizer: none
+  on_start:
+    - lambda: id(improv_ble_in_progress) = true;
+    - script.execute: control_leds
+  on_provisioned:
+    - lambda: id(improv_ble_in_progress) = false;
+    - script.execute: control_leds
+  on_stop:
+    - lambda: id(improv_ble_in_progress) = false;
+    - script.execute: control_leds
