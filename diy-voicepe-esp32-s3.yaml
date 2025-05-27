@@ -76,11 +76,8 @@ packages:
 wifi:
   id: wifi_id
   output_power: 8.5
-  use_address: "192.168.1.122"
-  # manual_ip:
-  #   static_ip: "192.168.88.x"
-  #   gateway: "192.168.88.1"
-  #   subnet: "255.255.255.0"
+  enable_btm: true
+  enable_rrm: true
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
     - script.execute: control_leds
