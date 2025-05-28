@@ -13,12 +13,12 @@ packages:
 
 esphome:
   project:
-    name: MorganMLGman.DIY_VoicePE
+    name: DoYouHost.DIY_VoicePE
     version: dev
 
 dashboard_import:
   package_import_url:
-    github://MorganMLGman/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
+    github://DoYouHost/DIY_VoicePE/diy-voicepe-esp32-s3.yaml@main
 
 wifi:
   on_connect:
