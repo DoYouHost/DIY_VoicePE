@@ -1282,10 +1282,6 @@ select:
       - Moderately sensitive
       - Very sensitive
     on_value:
-      # Sets specific wake word probabilities computed for each particular model
-      # Note probability cutoffs are set as a quantized uint8 value, each comment has the corresponding floating point cutoff
-      # False Accepts per Hour values are tested against all units and channels from the Dinner Party Corpus.
-      # These cutoffs apply only to the specific models included in the firmware: okay_nabu@20241226.3, hey_jarvis@v2, hey_mycroft@v2
       lambda: |-
         if (x == "Slightly sensitive") {
           id(okay_nabu).set_probability_cutoff(217);    // 0.85 -> 0.000 FAPH on DipCo (Manifest's default)
