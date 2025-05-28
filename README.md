@@ -9,14 +9,4 @@
 <img height="150" alt="DIY Voice Gif" src="assets/20250214_175500(1).gif">
 </p>
 
-This repo serves as a template for creating a new ESPHome project.
-
-It includes a GitHub workflow that will automatically build the configuration(s) and then deploys a simple 
-website via GitHub pages that utilises [ESP Web Tools](https://esphome.github.io/esp-web-tools/) for users to 
-easily install your project onto their device.
-
-## Instructions
-
-1. Use this repo template to [generate](https://github.com/esphome/esphome-project-template/generate) your own repository.
-2. Clone your new repository.
-3. Follow the checklist created as an issue in your new repository.
+This is a project to create DIY alternative to the popular [VoicePE](https://github.com/esphome/home-assistant-voice-pe) speaker .
