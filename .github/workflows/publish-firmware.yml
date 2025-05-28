@@ -10,7 +10,7 @@ permissions:
 jobs:
   build-firmware:
     name: Build Firmware
-    uses: esphome/workflows/.github/workflows/build.yml@2025.4.0
+    uses: MorganMLGman/DIY_VoicePE/.github/workflows/build.yaml@main
     with:
       #### Modify below here to match your project ####
       files: |
