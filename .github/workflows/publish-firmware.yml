@@ -10,7 +10,7 @@ permissions:
 jobs:
   build-firmware:
     name: Build Firmware
-    uses: MorganMLGman/DIY_VoicePE/.github/workflows/build.yaml@main
+    uses: MorganMLGman/DIY_VoicePE/.github/workflows/build.yml@main
     with:
       #### Modify below here to match your project ####
       files: |
